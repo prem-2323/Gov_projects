@@ -1,6 +1,9 @@
 const Report = require('../models/Report.model');
+const aiService = require('../utils/aiService');
+const rewardPoints = require('../utils/rewardPoints');
+const googleMaps = require('../utils/googleMaps');
 
-// @desc    Create new report
+// @desc    Create new report with AI analysis
 // @route   POST /api/reports
 // @access  Private
 exports.createReport = async (req, res) => {
@@ -11,14 +14,54 @@ exports.createReport = async (req, res) => {
       url: file.path
     })) : [];
 
+    const locationData = JSON.parse(location);
+    
+    // Get address from coordinates
+    const addressInfo = await googleMaps.getAddressFromCoordinates(
+      locationData.coordinates[1],
+      locationData.coordinates[0]
+    );
+    
+    locationData.address = addressInfo.address;
+
+    // Create report
     const report = await Report.create({
       title,
       description,
       category,
-      location: JSON.parse(location),
+      location: locationData,
       images,
       reportedBy: req.user.id
     });
+
+    // Run AI analysis if images provided
+    if (images.length > 0) {
+      try {
+        const analysis = await aiService.analyzeImage(images[0].url);
+        
+        if (analysis.success) {
+          // Update with AI results
+          const aiData = analysis.analysis;
+          
+          report.aiVerification.verified = true;
+          report.aiVerification.confidence = aiData.classification?.confidence || 0;
+          
+          if (aiData.detection) {
+            report.aiVerification.wasteCount = aiData.detection.count || 0;
+            report.aiVerification.severity = aiData.detection.severity || {};
+            report.aiVerification.priority = aiData.detection.severity?.priority || 5;
+          }
+          
+          await report.save();
+          
+          // Award points for submission
+          await rewardPoints.awardSubmissionPoints(report._id);
+        }
+      } catch (aiError) {
+        console.error('AI analysis failed:', aiError.message);
+        // Continue without AI analysis
+      }
+    }
 
     res.status(201).json({ success: true, report });
   } catch (error) {
@@ -91,22 +134,51 @@ exports.startReport = async (req, res) => {
   }
 };
 
-// @desc    Complete report
+// @desc    Complete report with before/after verification
 // @route   PUT /api/reports/:id/complete
 // @access  Private (Cleaner, Admin)
 exports.completeReport = async (req, res) => {
   try {
     const afterImage = req.file ? req.file.path : null;
     
-    const report = await Report.findByIdAndUpdate(
-      req.params.id,
-      { 
-        status: 'completed',
-        afterImage,
-        completedAt: Date.now()
-      },
-      { new: true }
-    );
+    const report = await Report.findById(req.params.id);
+    if (!report) {
+      return res.status(404).json({ success: false, message: 'Report not found' });
+    }
+    
+    report.afterImage = afterImage;
+    report.status = 'completed';
+    report.completedAt = Date.now();
+    
+    // Verify cleanup with Siamese Network
+    if (report.images.length > 0 && afterImage) {
+      try {
+        const verification = await aiService.verifyCleanup(
+          report.images[0].url,
+          afterImage
+        );
+        
+        if (verification.success) {
+          const verifyData = verification.verification;
+          
+          report.cleanupVerification = {
+            verified: verifyData.is_cleaned,
+            cleanupQuality: verifyData.cleanup_quality,
+            status: verifyData.status,
+            rewardMultiplier: verifyData.reward_multiplier,
+            verifiedAt: Date.now()
+          };
+          
+          // Award completion points
+          await report.save();
+          await rewardPoints.awardCompletionPoints(report._id);
+        }
+      } catch (aiError) {
+        console.error('Cleanup verification failed:', aiError.message);
+      }
+    }
+    
+    await report.save();
     
     res.status(200).json({ success: true, report });
   } catch (error) {

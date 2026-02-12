@@ -5,10 +5,13 @@ A comprehensive waste management system with AI-powered waste detection, geoloca
 ## 🚀 Features
 
 - **Smart Waste Reporting** - Citizens can report waste with photos and GPS location
-- **AI Classification** - Automatic waste categorization using machine learning
-- **Real-time Tracking** - Track waste cleanup status in real-time
-- **Task Assignment** - Admin can assign cleanup tasks to cleaners
-- **Rewards System** - Gamification with points for active citizens
+- **AI Classification** - Automatic waste categorization using MobileNetV2 (8 waste types)
+- **Object Detection** - YOLOv8-powered waste detection with severity analysis
+- **Cleanup Verification** - Siamese Network for before/after image comparison
+- **Priority Assignment** - Automatic priority scoring (1-5) based on severity
+- **Real-time Tracking** - Track waste cleanup status with Google Maps integration
+- **Task Assignment** - Admin can assign cleanup tasks to nearest cleaners
+- **Rewards System** - Dynamic points with multipliers based on severity and quality
 - **Analytics Dashboard** - Comprehensive insights for administrators
 - **Mobile-First Design** - Responsive UI for all devices
 
@@ -57,9 +60,16 @@ Gov_projects/
 
 ### AI Models
 - Python + Flask
-- TensorFlow/Keras
+- TensorFlow/Keras  
+- PyTorch + YOLOv8 for object detection
+- Siamese Network for image comparison
 - OpenCV for image processing
 - Transfer learning with MobileNetV2
+
+### Integrations
+- Google Maps API for geocoding and location services
+- Real-time location tracking
+- JWT-based authentication
 
 ## 📋 Prerequisites
 
@@ -147,6 +157,7 @@ PORT=5000
 MONGODB_URI=mongodb://localhost:27017/waste-reporting
 JWT_SECRET=your_secret_key_here
 AI_MODEL_URL=http://localhost:8000
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 ```
 
 ## 📚 API Documentation
@@ -164,7 +175,13 @@ AI_MODEL_URL=http://localhost:8000
 ### AI Classification
 - `POST /api/classify` - Classify waste image
 
-See individual README files for complete documentation:
+## 📖 Complete Documentation
+
+For detailed technical documentation, see:
+- **[WORKFLOW.md](./WORKFLOW.md)** - Complete system workflow, ML model architectures, process flows, and database schemas
+- **[API_DOCUMENTATION.md](./API_DOCUMENTATION.md)** - Comprehensive API reference with request/response examples for all endpoints
+
+See individual README files for setup instructions:
 - [Frontend Documentation](./frontend/README.md)
 - [Backend Documentation](./backend/README.md)
 - [AI Models Documentation](./ai-models/README.md)
