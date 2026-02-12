@@ -19,13 +19,21 @@ A comprehensive waste management system with AI-powered waste detection, geoloca
 
 ```
 Gov_projects/
-├── frontend/           # React + TypeScript frontend
+├── frontend/           # React + TypeScript web app
 │   ├── src/
 │   │   ├── components/
 │   │   ├── context/
 │   │   └── styles/
 │   ├── package.json
 │   └── vite.config.ts
+│
+├── mobile/             # React Native + Expo mobile app
+│   ├── src/
+│   │   ├── screens/    # App screens (Citizen/Cleaner/Admin)
+│   │   └── context/    # State management
+│   ├── App.js          # Main app entry
+│   ├── app.json        # Expo configuration
+│   └── package.json    # Expo dependencies
 │
 ├── backend/            # Node.js + Express API
 │   ├── models/         # MongoDB models
@@ -46,11 +54,19 @@ Gov_projects/
 
 ## 🛠️ Tech Stack
 
-### Frontend
+### Frontend (Web)
 - React 18 with TypeScript
 - Vite for build tooling
 - Tailwind CSS + shadcn/ui
 - Context API for state management
+
+### Mobile App
+- React Native with Expo SDK 50
+- Expo Camera & Location APIs
+- React Navigation for routing
+- React Native Maps for location tracking
+- React Native Paper for UI components
+- AsyncStorage for local data
 
 ### Backend
 - Node.js + Express
@@ -87,7 +103,7 @@ git clone https://github.com/prem-2323/Gov_projects.git
 cd Gov_projects
 ```
 
-### 2. Setup Frontend
+### 2. Setup Frontend (Web)
 
 ```bash
 cd frontend
@@ -97,7 +113,28 @@ npm run dev
 
 Frontend runs at: `http://localhost:5173`
 
-### 3. Setup Backend
+### 3. Setup Mobile App (React Native + Expo)
+
+```bash
+cd mobile
+npm install
+
+# Update API_URL in src/context/AppContext.js to your local IP
+# Example: const API_URL = 'http://192.168.1.100:5000/api'
+
+npm start
+```
+
+**To run on your phone:**
+1. Install **Expo Go** app from App Store/Play Store
+2. Scan the QR code shown in terminal
+3. App will open in Expo Go
+
+**Important:** Your phone and computer must be on the same WiFi network!
+
+See [mobile/README.md](./mobile/README.md) for detailed mobile setup instructions.
+
+### 4. Setup Backend
 
 ```bash
 cd backend
@@ -108,7 +145,7 @@ npm run dev
 
 Backend API runs at: `http://localhost:5000`
 
-### 4. Setup AI Models
+### 5. Setup AI Models
 
 ```bash
 cd ai-models

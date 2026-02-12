@@ -1,0 +1,59 @@
+{
+  "expo": {
+    "name": "Waste Reporter",
+    "slug": "waste-reporting-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#10b981"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.premkumar.wastereporter",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app needs access to your camera to capture waste photos.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to select waste photos.",
+        "NSLocationWhenInUseUsageDescription": "This app needs your location to tag waste reports with GPS coordinates.",
+        "NSLocationAlwaysUsageDescription": "This app needs your location to provide accurate waste tracking."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#10b981"
+      },
+      "package": "com.premkumar.wastereporter",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to capture waste photos."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to tag waste reports."
+        }
+      ]
+    ]
+  }
+}
