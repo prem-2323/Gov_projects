@@ -1,0 +1,15 @@
+{
+  "name": "waste-detection-ai-models",
+  "version": "1.0.0",
+  "description": "AI Models for Waste Detection and Classification",
+  "main": "app.py",
+  "scripts": {
+    "train": "python training/train_model.py",
+    "inference": "python inference/predict.py",
+    "serve": "python app.py",
+    "test": "pytest tests/"
+  },
+  "keywords": ["ai", "waste-detection", "computer-vision", "tensorflow"],
+  "author": "",
+  "license": "MIT"
+}
