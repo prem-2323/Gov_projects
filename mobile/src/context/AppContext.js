@@ -5,7 +5,7 @@ import axios from 'axios';
 const AppContext = createContext();
 
 // Update this to your backend URL
-const API_URL = 'http://192.168.1.100:5000/api'; // Change to your computer's local IP
+const API_URL = 'http://10.74.62.246:5000/api'; // Your computer's local IP
 
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
