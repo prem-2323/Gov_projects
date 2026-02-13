@@ -52,9 +52,6 @@ def health_check():
 def classify_waste():
     """
     Classify waste from uploaded image
-    
-    Expected: multipart/form-data with 'image' file
-    Returns: JSON with predictions
     """
     try:
         if 'image' not in request.files:
@@ -85,9 +82,6 @@ def classify_waste():
 def detect_waste():
     """
     Detect waste objects in image using YOLOv8
-    
-    Expected: multipart/form-data with 'image' file
-    Returns: JSON with detections, severity, and priority
     """
     try:
         if 'image' not in request.files:
@@ -108,13 +102,28 @@ def detect_waste():
         try:
             # Detect waste objects
             detections = yolo_detector.detect(temp_path)
+            # Analyze severity
+            severity_analysis = yolo_detector.analyze_severity(detections)
+            
+            return jsonify({
+                'success': True,
+                'detections': detections,
+                'count': len(detections),
+                'severity': severity_analysis
+            }), 200
+        finally:
+            # Clean up temp file
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)
+        
+    except Exception as e:
+        logger.error(f"Error during detection: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/verify-cleanup', methods=['POST'])
 def verify_cleanup():
     """
     Verify cleanup by comparing before and after images using Siamese Network
-    
-    Expected: multipart/form-data with 'before_image' and 'after_image' files
-    Returns: JSON with verification results and reward calculation
     """
     try:
         if 'before_image' not in request.files or 'after_image' not in request.files:
@@ -162,9 +171,6 @@ def verify_cleanup():
 def analyze_full():
     """
     Full analysis: classification + detection + severity
-    
-    Expected: multipart/form-data with 'image' file
-    Returns: Complete analysis with all models
     """
     try:
         if 'image' not in request.files:
@@ -184,7 +190,7 @@ def analyze_full():
             
             # Classification
             if classifier is not None:
-                file.seek(0)  # Reset file pointer
+                # Predict needs a file-like object
                 classification = classifier.predict(file)
                 results['classification'] = classification
             
@@ -209,25 +215,6 @@ def analyze_full():
         
     except Exception as e:
         logger.error(f"Error during full analysis: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-
-            
-            # Analyze severity
-            severity_analysis = yolo_detector.analyze_severity(detections)
-            
-            return jsonify({
-                'success': True,
-                'detections': detections,
-                'count': len(detections),
-                'severity': severity_analysis
-            }), 200
-        finally:
-            # Clean up temp file
-            if os.path.exists(temp_path):
-                os.unlink(temp_path)
-        
-    except Exception as e:
-        logger.error(f"Error during detection: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
