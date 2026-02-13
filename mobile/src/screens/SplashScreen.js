@@ -1,13 +1,35 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, Image, Text } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, Text, ActivityIndicator } from 'react-native';
 import { useApp } from '../context/AppContext';
 
 export default function SplashScreen({ navigation }) {
-  const { user, loading } = useApp();
+  const [navigated, setNavigated] = useState(false);
+  
+  // Try to get context, but don't fail if it's not available
+  let user = null;
+  let loading = true;
+  
+  try {
+    const context = useApp();
+    user = context.user;
+    loading = context.loading;
+  } catch (error) {
+    console.error('Error accessing AppContext:', error);
+    loading = false;
+  }
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!loading) {
+    console.log('SplashScreen mounted, loading:', loading, 'user:', user);
+    
+    if (navigated) return;
+
+    const navigate = () => {
+      if (navigated) return;
+      
+      console.log('Attempting navigation, user:', user);
+      setNavigated(true);
+      
+      try {
         if (user) {
           // Navigate based on user role
           if (user.role === 'citizen') {
@@ -16,15 +38,32 @@ export default function SplashScreen({ navigation }) {
             navigation.replace('CleanerHome');
           } else if (user.role === 'admin') {
             navigation.replace('AdminHome');
+          } else {
+            navigation.replace('RoleSelection');
           }
         } else {
           navigation.replace('RoleSelection');
         }
+      } catch (navError) {
+        console.error('Navigation error:', navError);
       }
-    }, 2000);
+    };
 
-    return () => clearTimeout(timer);
-  }, [user, loading, navigation]);
+    // If loading is complete, wait 1 second then navigate
+    if (!loading) {
+      console.log('Loading complete, will navigate in 1 second');
+      const timer = setTimeout(navigate, 1000);
+      return () => clearTimeout(timer);
+    }
+    
+    // Failsafe: Always navigate after 3 seconds maximum
+    const maxTimer = setTimeout(() => {
+      console.log('Max timeout reached, forcing navigation');
+      navigate();
+    }, 3000);
+    
+    return () => clearTimeout(maxTimer);
+  }, [loading, user, navigation, navigated]);
 
   return (
     <View style={styles.container}>
@@ -34,6 +73,14 @@ export default function SplashScreen({ navigation }) {
         </View>
         <Text style={styles.title}>Waste Reporter</Text>
         <Text style={styles.subtitle}>Smart City, Clean Future</Text>
+        <ActivityIndicator 
+          size="large" 
+          color="white" 
+          style={styles.loader} 
+        />
+        <Text style={styles.statusText}>
+          {loading ? 'Loading...' : 'Starting...'}
+        </Text>
       </View>
     </View>
   );
@@ -70,5 +117,14 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.9)',
+  },
+  loader: {
+    marginTop: 32,
+  },
+  statusText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: 'white',
+    opacity: 0.8,
   },
 });

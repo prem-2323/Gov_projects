@@ -5,7 +5,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { AppProvider } from './src/context/AppContext';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
+import { View, Text, StyleSheet } from 'react-native';
 
 // Screens
 import SplashScreen from './src/screens/SplashScreen';
@@ -107,29 +108,85 @@ function AdminTabs() {
   );
 }
 
+// Error Boundary Component
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('App Error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={errorStyles.container}>
+          <Text style={errorStyles.title}>⚠️ Something went wrong</Text>
+          <Text style={errorStyles.message}>Please restart the app</Text>
+          <Text style={errorStyles.error}>{this.state.error?.message}</Text>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const errorStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  message: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 20,
+  },
+  error: {
+    fontSize: 12,
+    color: '#999',
+    textAlign: 'center',
+  },
+});
+
 export default function App() {
   return (
-    <PaperProvider>
-      <AppProvider>
-        <NavigationContainer>
-          <StatusBar style="auto" />
-          <Stack.Navigator
-            initialRouteName="Splash"
-            screenOptions={{
-              headerShown: false,
-            }}
-          >
-            <Stack.Screen name="Splash" component={SplashScreen} />
-            <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="CitizenHome" component={CitizenTabs} />
-            <Stack.Screen name="CleanerHome" component={CleanerTabs} />
-            <Stack.Screen name="AdminHome" component={AdminTabs} />
-            <Stack.Screen name="ReportDetail" component={ReportDetailScreen} options={{ headerShown: true, title: 'Report Details' }} />
-            <Stack.Screen name="Rewards" component={RewardsScreen} options={{ headerShown: true, title: 'Rewards' }} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </AppProvider>
-    </PaperProvider>
+    <ErrorBoundary>
+      <PaperProvider>
+        <AppProvider>
+          <NavigationContainer>
+            <StatusBar style="auto" />
+            <Stack.Navigator
+              initialRouteName="Splash"
+              screenOptions={{
+                headerShown: false,
+              }}
+            >
+              <Stack.Screen name="Splash" component={SplashScreen} />
+              <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="CitizenHome" component={CitizenTabs} />
+              <Stack.Screen name="CleanerHome" component={CleanerTabs} />
+              <Stack.Screen name="AdminHome" component={AdminTabs} />
+              <Stack.Screen name="ReportDetail" component={ReportDetailScreen} options={{ headerShown: true, title: 'Report Details' }} />
+              <Stack.Screen name="Rewards" component={RewardsScreen} options={{ headerShown: true, title: 'Rewards' }} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </AppProvider>
+      </PaperProvider>
+    </ErrorBoundary>
   );
 }
